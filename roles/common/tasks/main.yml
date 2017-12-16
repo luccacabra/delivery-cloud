@@ -1,0 +1,28 @@
+- name: install git
+  apt:
+    name: git
+    state: present
+
+- name: download go {{ go_version }}
+  get_url:
+    url: https://redirector.gvt1.com/edgedl/go/go{{ go_version }}.linux-amd64.tar.gz
+    dest: /tmp
+    checksum: "sha256:{{ go_checksum }}"
+
+- name: extract go {{ go_version }}
+  unarchive:
+    src: "/tmp/go{{ go_version }}.linux-amd64.tar.gz"
+    dest: /usr/local
+    remote_src: yes
+
+- name: clean up go download
+  file:
+    state: absent
+    name: "/tmp/go{{ go_version }}.linux-amd64.tar.gz"
+
+- name: Set go environment variables
+  become: true
+  copy:
+    src: bin/setup-go.sh
+    dest: /etc/profile.d
+    mode: 0755

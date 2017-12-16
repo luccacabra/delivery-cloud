@@ -1,2 +1,7 @@
 *.csr
 *.pem
+
+# node generated certs
+roles/**/files/ca/
+
+.vagrant/

@@ -1,0 +1,47 @@
+- command: echo $PATH
+
+- name: copy cert template
+  copy:
+    src: worker-csr.json
+    dest: /tmp/worker-csr.json
+
+- name: copy cert config
+  copy:
+    src: csr/ca-config.json
+    dest: /tmp/ca/ca-config.json
+
+- name: copy certs
+  copy:
+    src: "{{ item }}"
+    dest: "/tmp/ca/"
+  with_fileglob:
+    - "csr/ca/*"
+
+- name: move ca cert
+  command: "scp /tmp/ca/ca.pem /etc/ssl/certs/ca.pem"
+  become: true
+
+- name: install cfssl
+  command: go get -u github.com/cloudflare/cfssl/cmd/...
+
+- name: generate worker cert
+  command: >
+    bash -c
+    "$GOPATH/bin/cfssl gencert
+    -ca=/tmp/ca/ca.pem
+    -ca-key=/tmp/ca/ca-key.pem
+    -config=/tmp/ca/ca-config.json
+    -hostname={{ ansible_nodename }},{{ ansible_default_ipv4.address }}
+    -profile=kubernetes
+    /tmp/worker-csr.json | $GOPATH/bin/cfssljson -bare /etc/ssl/certs/{{ ansible_nodename }}"
+  become: true
+
+- name: cleanup worker template
+  file:
+    name: "/tmp/worker-csr.json"
+    state: absent
+
+- name: cleanup temp certs
+  file:
+    name: "/tmp/ca"
+    state: absent

@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-create-certs:
+bootstrap-certs:
 	cfssl gencert -initca csr/ca-csr.json | cfssljson -bare csr/ca/ca \
 	&& cfssl gencert \
 		 -ca=csr/ca/ca.pem \
@@ -13,4 +13,8 @@ create-certs:
 		 -ca-key=csr/ca/ca-key.pem \
 		 -config=csr/ca-config.json \
 		 -profile=kubernetes \
-		 csr/kube-proxy-csr.json | cfssljson -bare csr/ca/kube-proxy
+		 csr/kube-proxy-csr.json | cfssljson -bare csr/ca/kube-proxy \
+    && cp -r csr/ca roles/worker/files \
+    && cp -r csr/ca roles/controller/files \
+    && cp -r csr/ca roles/controller/files
+

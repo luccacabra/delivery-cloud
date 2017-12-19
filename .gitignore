@@ -5,3 +5,7 @@
 roles/**/files/ca/
 
 .vagrant/
+
+.encryption_key
+
+*.retry

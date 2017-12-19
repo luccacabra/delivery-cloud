@@ -1,12 +1,11 @@
 ---
-- hosts: all
-  gather_facts: true
-  become: true
-  roles:
-    - common
-  environment:
-    PATH: "{{ ansible_env.PATH }}:/usr/local/go/bin"
-    GOPATH: "{{ ansible_env.HOME }}/go"
+#- hosts: all
+#  gather_facts: true
+#  roles:
+#    - common
+#  environment:
+#    PATH: "{{ ansible_env.PATH }}:/usr/local/go/bin"
+#    GOPATH: "{{ ansible_env.HOME }}/go"
 
 - hosts: controllers
   gather_facts: True

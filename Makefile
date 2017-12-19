@@ -14,7 +14,4 @@ bootstrap-certs:
 		 -config=csr/ca-config.json \
 		 -profile=kubernetes \
 		 csr/kube-proxy-csr.json | cfssljson -bare csr/ca/kube-proxy \
-    && cp -r csr/ca roles/worker/files \
-    && cp -r csr/ca roles/controller/files \
-    && cp -r csr/ca roles/controller/files
-
+    && cp -r csr/ca roles/common/files

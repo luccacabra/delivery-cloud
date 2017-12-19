@@ -1,47 +1,11 @@
-- command: echo $PATH
+- name: configure certs
+  include_tasks: configure_certs.yml
 
-- name: copy cert template
-  copy:
-    src: worker-csr.json
-    dest: /tmp/worker-csr.json
+- name: configure kubectl
+  include_tasks: configure_kubectl.yml
 
-- name: copy cert config
-  copy:
-    src: csr/ca-config.json
-    dest: /tmp/ca/ca-config.json
+- name: set kubectl worker context
+  command: "kubectl config use-context default --kubeconfig={{ ansible_env.HOME }}/.kube/{{ ansible_nodename }}.kubeconfig"
 
-- name: copy certs
-  copy:
-    src: "{{ item }}"
-    dest: "/tmp/ca/"
-  with_fileglob:
-    - "csr/ca/*"
-
-- name: move ca cert
-  command: "scp /tmp/ca/ca.pem /etc/ssl/certs/ca.pem"
-  become: true
-
-- name: install cfssl
-  command: go get -u github.com/cloudflare/cfssl/cmd/...
-
-- name: generate worker cert
-  command: >
-    bash -c
-    "$GOPATH/bin/cfssl gencert
-    -ca=/tmp/ca/ca.pem
-    -ca-key=/tmp/ca/ca-key.pem
-    -config=/tmp/ca/ca-config.json
-    -hostname={{ ansible_nodename }},{{ ansible_default_ipv4.address }}
-    -profile=kubernetes
-    /tmp/worker-csr.json | $GOPATH/bin/cfssljson -bare /etc/ssl/certs/{{ ansible_nodename }}"
-  become: true
-
-- name: cleanup worker template
-  file:
-    name: "/tmp/worker-csr.json"
-    state: absent
-
-- name: cleanup temp certs
-  file:
-    name: "/tmp/ca"
-    state: absent
+- name: set kubectl kube-proxy context
+  command: "kubectl config use-context default --kubeconfig={{ ansible_env.HOME }}/.kube/kube-proxy.kubeconfig"

@@ -2,18 +2,21 @@
   apt:
     name: git
     state: present
+  become: true
 
 - name: download go {{ go_version }}
   get_url:
     url: https://redirector.gvt1.com/edgedl/go/go{{ go_version }}.linux-amd64.tar.gz
     dest: /tmp
     checksum: "sha256:{{ go_checksum }}"
+    timeout: 30
 
 - name: extract go {{ go_version }}
   unarchive:
     src: "/tmp/go{{ go_version }}.linux-amd64.tar.gz"
     dest: /usr/local
     remote_src: yes
+  become: true
 
 - name: clean up go download
   file:
@@ -21,8 +24,38 @@
     name: "/tmp/go{{ go_version }}.linux-amd64.tar.gz"
 
 - name: Set go environment variables
-  become: true
   copy:
     src: bin/setup-go.sh
     dest: /etc/profile.d
     mode: 0755
+  become: true
+
+- name: install cfssl
+  command: go get -u github.com/cloudflare/cfssl/cmd/...
+
+- name: copy ca
+  copy:
+    src: csr/ca/ca.pem
+    dest: /etc/ssl/certs/
+    mode: 0644
+  become: true
+
+- name: create tmp cert directory
+  file:
+    path: /tmp/certs
+    mode: 0777
+    state: directory
+  become: true
+
+- name: copy ca config
+  copy:
+    src: csr/ca-config.json
+    dest: /tmp/certs/
+    mode: 777
+
+- name: install kubectl
+  get_url:
+    url: https://storage.googleapis.com/kubernetes-release/release/{{ kubectl_version }}/bin/linux/amd64/kubectl
+    dest: /usr/local/bin
+    mode: a+x
+  become: true

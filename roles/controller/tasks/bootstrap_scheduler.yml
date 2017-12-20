@@ -1,0 +1,7 @@
+---
+- name: install scheduler
+  get_url:
+    url: "https://storage.googleapis.com/kubernetes-release/release/{{ kubernetes_version }}/bin/linux/amd64/kube-scheduler"
+    dest: /usr/local/bin/
+    mode: a+x
+  become: true

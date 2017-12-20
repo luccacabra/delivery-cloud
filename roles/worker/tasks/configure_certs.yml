@@ -36,7 +36,7 @@
     -ca=/etc/ssl/certs/ca.pem
     -ca-key=/tmp/certs/ca-key.pem
     -config=/tmp/certs/ca-config.json
-    -hostname={{ ansible_nodename }},{{ hostvars[host]['ansible_eth1']['ipv4']['address'] }}
+    -hostname={{ ansible_nodename }},{{ hostvars[inventory_hostname]['ansible_eth1']['ipv4']['address'] }}
     -profile=kubernetes
     /tmp/certs/worker-csr.json | $GOPATH/bin/cfssljson -bare /etc/ssl/certs/{{ ansible_nodename }}"
   become: true

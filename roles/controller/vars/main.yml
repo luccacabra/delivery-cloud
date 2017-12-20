@@ -1,0 +1,30 @@
+---
+# this could all be done in apiserver unit file copy directive, but is more readable in this format :shrug:
+
+api_admission_control: Initializers,NamespaceLifecycle,NodeRestriction,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota
+
+api_allow_privileged: true
+
+api_authorization_mode: Node,RBAC
+
+api_audit_log_maxage: 30
+api_audit_log_maxbackup: 3
+api_audit_log_maxsize: 100
+api_audit_log_path: /var/log/audit.log
+
+api_bind_address: 0.0.0.0
+
+api_enable_swagger_ui: true
+
+api_event_ttl: 1h
+
+api_insecure_bind_address: 127.0.0.1
+
+api_kubelet_https: true
+
+api_restart_sec: 5
+
+api_runtime_config: api/all
+
+api_service_cluster_ip_range: 10.32.0.0/24
+api_service_node_port_range: 30000-32767

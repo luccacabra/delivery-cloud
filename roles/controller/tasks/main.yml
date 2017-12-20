@@ -24,3 +24,12 @@
 
 - name: bootstrap etcd
   include_tasks: bootstrap_etcd.yml
+
+- name: bootstrap api-server
+  include_tasks: bootstrap_api_server.yml
+
+- name: bootstrap controller-manager
+  include_tasks: bootstrap_controller_manager.yml
+
+- name: bootstrap scheduler
+  include_tasks: bootstrap_scheduler.yml

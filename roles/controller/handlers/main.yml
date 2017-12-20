@@ -10,3 +10,15 @@
     name: etcd
     state: restarted
   become: true
+
+- name: reload apiserver
+  command: systemctl daemon-reload
+  become: true
+  notify:
+    - restart etcd
+
+- name: restart apiserver
+  service:
+    name: apiserver
+    state: restarted
+  become: true

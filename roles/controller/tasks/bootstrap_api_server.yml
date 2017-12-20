@@ -1,0 +1,89 @@
+---
+- name: install api server
+  get_url:
+    url: "https://storage.googleapis.com/kubernetes-release/release/{{ kubernetes_version }}/bin/linux/amd64/kube-apiserver"
+    dest: /usr/local/bin/
+    mode: a+x
+  become: true
+
+- name: create api server directory
+  file:
+    path: /var/lib/kubernetes/
+    state: directory
+  become: true
+
+- name: copy ca cert to api server
+  copy:
+    src: /etc/ssl/certs/ca.pem
+    dest: /var/lib/kubernetes/ca.pem
+    remote_src: yes
+  become: true
+
+- name: copy kubernetes cert to api server
+  copy:
+    src: /etc/ssl/certs/kubernetes.pem
+    dest: /var/lib/kubernetes/kubernetes.pem
+    remote_src: yes
+  become: true
+
+- name: copy kubernetes-key to api server
+  copy:
+    src: /etc/ssl/certs/kubernetes-key.pem
+    dest: /var/lib/kubernetes/kubernetes-key.pem
+    remote_src: yes
+  become: true
+
+- name: copy encryption config to api server
+  copy:
+    src: "{{ ansible_env.HOME }}/.kube/encryption-config.yml"
+    dest: /var/lib/kubernetes/encryption-config.yml
+    remote_src: yes
+  become: true
+
+- name: create api server unit file
+  copy:
+    content: |
+      [Unit]
+      Description=Kubernetes API Server
+      Documentation=https://github.com/kubernetes/kubernetes
+
+      [Service]
+      ExecStart=/usr/local/bin/kube-apiserver \
+        --admission-control={{ api_admission_control }} \
+        --advertise-address={{ hostvars[inventory_hostname]['ansible_eth1']['ipv4']['address'] }} \
+        --allow-privileged={{ api_allow_privileged }} \
+        --apiserver-count={{ apiserver_count }} \
+        --audit-log-maxage={{ api_audit_log_maxage }} \
+        --audit-log-maxbackup={{ api_audit_log_maxbackup }} \
+        --audit-log-maxsize={{ api_audit_log_maxsize }} \
+        --audit-log-path={{ api_audit_log_path }} \
+        --authorization-mode={{ api_authorization_mode }} \
+        --bind-address={{ api_bind_address }} \
+        --client-ca-file=/var/lib/kubernetes/ca.pem \
+        --enable-swagger-ui={{ api_enable_swagger_ui }} \
+        --etcd-cafile=/var/lib/kubernetes/ca.pem \
+        --etcd-certfile=/var/lib/kubernetes/kubernetes.pem \
+        --etcd-keyfile=/var/lib/kubernetes/kubernetes-key.pem \
+        --etcd-servers={{ etcd_hosts }} \
+        --event-ttl={{ api_event_ttl }} \
+        --experimental-encryption-provider-config=/var/lib/kubernetes/encryption-config.yaml \
+        --insecure-bind-address={{ api_insecure_bind_address }} \
+        --kubelet-certificate-authority=/var/lib/kubernetes/ca.pem \
+        --kubelet-client-certificate=/var/lib/kubernetes/kubernetes.pem \
+        --kubelet-client-key=/var/lib/kubernetes/kubernetes-key.pem \
+        --kubelet-https={{ api_kubelet_https }} \
+        --runtime-config={{ api_runtime_config }} \
+        --service-account-key-file=/var/lib/kubernetes/ca-key.pem \
+        --service-cluster-ip-range={{ api_service_cluster_ip_range }} \
+        --service-node-port-range={{ api_service_node_port_range }} \
+        --tls-ca-file=/var/lib/kubernetes/ca.pem \
+        --tls-cert-file=/var/lib/kubernetes/kubernetes.pem \
+        --tls-private-key-file=/var/lib/kubernetes/kubernetes-key.pem \
+        --v=2
+      Restart=on-failure
+      RestartSec={{ api_restart_sec }}
+
+      [Install]
+      WantedBy=multi-user.target
+    dest: /etc/systemd/system/kube-apiserver.service
+  become: true

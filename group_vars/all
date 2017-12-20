@@ -5,5 +5,6 @@ go_version: 1.7.3
 go_checksum: 508028aac0654e993564b6e2014bf2d4a9751e3b286661b0b0040046cf18028e
 
 kubectl_version: v1.6.7
+kubernetes_version: v1.6.7
 
 public_ip: 10.0.0.100

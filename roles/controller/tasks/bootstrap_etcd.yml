@@ -85,10 +85,10 @@
         --peer-trusted-ca-file=/etc/etcd/ca.pem \
         --peer-client-cert-auth \
         --client-cert-auth \
-        --initial-advertise-peer-urls https://{{ hostvars[host]['ansible_eth1']['ipv4']['address'] }}:2380 \
-        --listen-peer-urls https://{{ hostvars[host]['ansible_eth1']['ipv4']['address'] }}:2380 \
-        --listen-client-urls https://{{ ahostvars[host]['ansible_eth1']['ipv4']['address'] }}:2379,http://127.0.0.1:2379 \
-        --advertise-client-urls https://{{ hostvars[host]['ansible_eth1']['ipv4']['address'] }}:2379 \
+        --initial-advertise-peer-urls https://{{ hostvars[inventory_hostname]['ansible_eth1']['ipv4']['address'] }}:2380 \
+        --listen-peer-urls https://{{ hostvars[inventory_hostname]['ansible_eth1']['ipv4']['address'] }}:2380 \
+        --listen-client-urls https://{{ hostvars[inventory_hostname]['ansible_eth1']['ipv4']['address'] }}:2379,http://127.0.0.1:2379 \
+        --advertise-client-urls https://{{ hostvars[inventory_hostname]['ansible_eth1']['ipv4']['address'] }}:2379 \
         --initial-cluster-token etcd-cluster-0 \
         --initial-cluster {{ etcd_ips }} \
         --initial-cluster-state new \

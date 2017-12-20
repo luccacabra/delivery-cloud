@@ -1,26 +1,26 @@
-#- name: configure certs
-#  include_tasks: configure_certs.yml
-#
-#- name: create kube config directory
-#  file:
-#    name: "{{ ansible_env.HOME }}/.kube/"
-#    state: directory
-#
-#- name: create encryption config
-#  copy:
-#    content: |
-#      kind: EncryptionConfig
-#      apiVersion: v1
-#      resources:
-#        - resources:
-#            - secrets
-#          providers:
-#            - aescbc:
-#                keys:
-#                  - name: key1
-#                    secret: {{ encryption_key }}
-#            - identity: {}
-#    dest: "{{ ansible_env.HOME }}/.kube/encryption-config.yml"
+- name: configure certs
+  include_tasks: configure_certs.yml
+
+- name: create kube config directory
+  file:
+    name: "{{ ansible_env.HOME }}/.kube/"
+    state: directory
+
+- name: create encryption config
+  copy:
+    content: |
+      kind: EncryptionConfig
+      apiVersion: v1
+      resources:
+        - resources:
+            - secrets
+          providers:
+            - aescbc:
+                keys:
+                  - name: key1
+                    secret: {{ encryption_key }}
+            - identity: {}
+    dest: "{{ ansible_env.HOME }}/.kube/encryption-config.yml"
 
 - name: bootstrap etcd
   include_tasks: bootstrap_etcd.yml

@@ -1,0 +1,1 @@
+export ETCD_NAME=$(hostname -s)

@@ -15,6 +15,7 @@
   copy:
     src: "/tmp/etcd-v{{ etcd_version }}-linux-amd64/etcd"
     dest: /usr/local/bin/etcd
+    mode: a+x
     remote_src: yes
   become: true
 
@@ -22,5 +23,82 @@
   copy:
     src: "/tmp/etcd-v{{ etcd_version }}-linux-amd64/etcdctl"
     dest: /usr/local/bin/etcdctl
+    mode: a+x
     remote_src: yes
   become: true
+
+- name: create /etc/etcd
+  file:
+    path: /etc/etcd
+    state: directory
+  become: true
+
+- name: create /var/lib/etcd
+  file:
+    path: /var/lib/etcd
+    state: directory
+  become: true
+
+- name: copy ca cert to etcd
+  copy:
+    src: /etc/ssl/certs/ca.pem
+    dest: /etc/etcd/ca.pem
+    remote_src: yes
+  become: true
+
+- name: copy kubernetes cert to etcd
+  copy:
+    src: /etc/ssl/certs/kubernetes.pem
+    dest: /etc/etcd/kubernetes.pem
+    remote_src: yes
+  become: true
+
+- name: copy kubernetes-key to etcd
+  copy:
+    src: /etc/ssl/certs/kubernetes-key.pem
+    dest: /etc/etcd/kubernetes-key.pem
+    remote_src: yes
+  become: true
+
+- name: Set etcd environment variables
+  copy:
+    src: bin/setup-etcd.sh
+    dest: /etc/profile.d
+    mode: 0755
+  become: true
+
+- name: create etcd unit file
+  copy:
+    content: |
+      [Unit]
+      Description=etcd
+      Documentation=https://github.com/coreos
+
+      [Service]
+      ExecStart=/usr/local/bin/etcd \
+        --name {{ ansible_nodename }} \
+        --cert-file=/etc/etcd/kubernetes.pem \
+        --key-file=/etc/etcd/kubernetes-key.pem \
+        --peer-cert-file=/etc/etcd/kubernetes.pem \
+        --peer-key-file=/etc/etcd/kubernetes-key.pem \
+        --trusted-ca-file=/etc/etcd/ca.pem \
+        --peer-trusted-ca-file=/etc/etcd/ca.pem \
+        --peer-client-cert-auth \
+        --client-cert-auth \
+        --initial-advertise-peer-urls https://{{ hostvars[host]['ansible_eth1']['ipv4']['address'] }}:2380 \
+        --listen-peer-urls https://{{ hostvars[host]['ansible_eth1']['ipv4']['address'] }}:2380 \
+        --listen-client-urls https://{{ ahostvars[host]['ansible_eth1']['ipv4']['address'] }}:2379,http://127.0.0.1:2379 \
+        --advertise-client-urls https://{{ hostvars[host]['ansible_eth1']['ipv4']['address'] }}:2379 \
+        --initial-cluster-token etcd-cluster-0 \
+        --initial-cluster {{ etcd_ips }} \
+        --initial-cluster-state new \
+        --data-dir=/var/lib/etcd
+      Restart=on-failure
+      RestartSec=5
+
+      [Install]
+      WantedBy=multi-user.target
+    dest: /etc/systemd/system/etcd.service
+  become: true
+  notify:
+    - reload etcd

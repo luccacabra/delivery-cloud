@@ -1,18 +1,18 @@
 ---
-#- hosts: all
-#  gather_facts: true
-#  roles:
-#    - common
-#  environment:
-#    PATH: "{{ ansible_env.PATH }}:/usr/local/go/bin"
-#    GOPATH: "{{ ansible_env.HOME }}/go"
+- hosts: all
+  gather_facts: true
+  roles:
+    - common
+  environment:
+    PATH: "{{ ansible_env.PATH }}:/usr/local/sbin:/usr/sbin:/sbin:/usr/local/go/bin"
+    GOPATH: "{{ ansible_env.HOME }}/go"
 
 - hosts: controllers
   gather_facts: True
   roles:
     - controller
   environment:
-    PATH: "{{ ansible_env.PATH }}:/usr/local/go/bin"
+    PATH: "{{ ansible_env.PATH }}:/usr/local/sbin:/usr/sbin:/sbin:/usr/local/go/bin"
     GOPATH: "{{ ansible_env.HOME }}/go"
 
 - hosts: workers
@@ -20,7 +20,7 @@
   roles:
     - worker
   environment:
-    PATH: "{{ ansible_env.PATH }}:/usr/local/go/bin"
+    PATH: "{{ ansible_env.PATH }}:/usr/local/sbin:/usr/sbin:/sbin:/usr/local/go/bin"
     GOPATH: "{{ ansible_env.HOME }}/go"
 
 - hosts: loadbalancers
@@ -28,5 +28,5 @@
   roles:
     - loadbalancer
   environment:
-    PATH: "{{ ansible_env.PATH }}:/usr/local/go/bin"
+    PATH: "{{ ansible_env.PATH }}:/usr/local/sbin:/usr/sbin:/sbin:/usr/local/go/bin"
     GOPATH: "{{ ansible_env.HOME }}/go"

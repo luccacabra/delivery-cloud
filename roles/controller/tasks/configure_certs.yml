@@ -17,7 +17,7 @@
     -ca=/etc/ssl/certs/ca.pem
     -ca-key=/etc/ssl/certs/ca-key.pem
     -config=/tmp/certs/ca-config.json
-    -hostname=10.32.0.1,10.240.0.10,10.240.0.11,10.240.0.12,{{ public_ip }},127.0.0.1,kubernetes.default
+    -hostname=10.32.0.1,{{ controller_ips }},{{ public_ip }},127.0.0.1,kubernetes.default
     -profile=kubernetes
     /tmp/certs/kubernetes-csr.json | $GOPATH/bin/cfssljson -bare /etc/ssl/certs/kubernetes"
   become: true

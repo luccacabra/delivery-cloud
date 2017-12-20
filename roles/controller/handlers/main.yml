@@ -1,0 +1,12 @@
+---
+- name: reload etcd
+  command: systemctl daemon-reload
+  become: true
+  notify:
+    - restart etcd
+
+- name: restart etcd
+  service:
+    name: etcd
+    state: restarted
+  become: true

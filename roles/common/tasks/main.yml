@@ -1,6 +1,12 @@
 - name: install git
   apt:
-    name: git
+    name: git-core
+    state: present
+  become: true
+
+- name: install gcc
+  apt:
+    name: gcc
     state: present
   become: true
 

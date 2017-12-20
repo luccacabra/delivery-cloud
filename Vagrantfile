@@ -4,6 +4,8 @@
 require 'yaml'
 
 controllers = []
+controller_ips = []
+etcd_ips = [] # etcd ips for unit.d file (avoiding parsing in ansible)
 workers = []
 loadbalancers = []
 
@@ -19,13 +21,19 @@ else
   File.open(".encryption_key", "w") {|f| f.write("#{encryption_key}") }
 end
 
+# grap ips outside of vagrant block to ensure they're available for provisioning
+(2..4).each do |controller|
+  controller_ips << "10.0.0.#{controller}"
+  etcd_ips << "kubes-controller#{controller}=https://10.0.0.#{controller}:2380"
+end
+
 Vagrant.configure("2") do |config|
 
   # controllers
   (2..4).each do |machine|
     config.vm.define "kubes-controller#{machine}" do |node|
       node.vm.hostname = "kubes-controller#{machine}"
-      node.vm.box = "ubuntu/precise64"
+      node.vm.box = "debian/jessie64"
       node.vm.network "private_network", ip: "10.0.0.#{machine}"
 
       node.vm.provider "virtualbox" do |vb|
@@ -41,7 +49,7 @@ Vagrant.configure("2") do |config|
   (1..3).each do |machine|
     config.vm.define "kubes-worker#{machine}" do |node|
       node.vm.hostname = "kubes-worker#{machine}"
-      node.vm.box = "ubuntu/precise64"
+      node.vm.box = "debian/jessie6"
       node.vm.network "private_network", ip: "10.0.0.1#{machine}"
 
       node.vm.provider "virtualbox" do |vb|
@@ -56,7 +64,7 @@ Vagrant.configure("2") do |config|
   # loadbalancer
   config.vm.define "kubes-loadbalancer" do |node|
     node.vm.hostname = "kubes-loadbalancer"
-    node.vm.box = "ubuntu/precise64"
+    node.vm.box = "debian/jessie6"
     node.vm.network "private_network", ip: vars["public_ip"]
 
     node.vm.provider "virtualbox" do |vb|
@@ -71,7 +79,9 @@ Vagrant.configure("2") do |config|
     ansible.verbose = "v"
     ansible.playbook = "site.yml"
     ansible.extra_vars  = {
-      "encryption_key" => encryption_key
+      "encryption_key" => encryption_key,
+      "etcd_ips" => etcd_ips.join(","),
+      "controller_ips" => controller_ips.join(",")
     }
     ansible.groups = {
         "controllers" => controllers,

@@ -1,7 +1,7 @@
 ---
 - name: install api server
   get_url:
-    url: "https://storage.googleapis.com/kubernetes-release/release/{{ kubernetes_version }}/bin/linux/amd64/kube-apiserver"
+    url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kubernetes_version }}/bin/linux/amd64/kube-apiserver"
     dest: /usr/local/bin/
     mode: a+x
   become: true
@@ -16,6 +16,13 @@
   copy:
     src: /etc/ssl/certs/ca.pem
     dest: /var/lib/kubernetes/ca.pem
+    remote_src: yes
+  become: true
+
+- name: copy ca key to api server
+  copy:
+    src: /etc/ssl/certs/ca-key.pem
+    dest: /var/lib/kubernetes/ca-key.pem
     remote_src: yes
   become: true
 
@@ -39,6 +46,15 @@
     dest: /var/lib/kubernetes/encryption-config.yml
     remote_src: yes
   become: true
+  when: use_encryption
+
+- set_fact:
+    encryption_flag: --experimental-encryption-provider-config=/var/lib/kubernetes/encryption-config.yaml \
+    when: use_encryption
+
+- set_fact:
+    encryption_flag: ""
+    when: not use_encryption
 
 - name: create api server unit file
   copy:
@@ -65,8 +81,8 @@
         --etcd-certfile=/var/lib/kubernetes/kubernetes.pem \
         --etcd-keyfile=/var/lib/kubernetes/kubernetes-key.pem \
         --etcd-servers={{ etcd_hosts }} \
+        {{ encryption_flag }} \
         --event-ttl={{ api_event_ttl }} \
-        --experimental-encryption-provider-config=/var/lib/kubernetes/encryption-config.yaml \
         --insecure-bind-address={{ api_insecure_bind_address }} \
         --kubelet-certificate-authority=/var/lib/kubernetes/ca.pem \
         --kubelet-client-certificate=/var/lib/kubernetes/kubernetes.pem \

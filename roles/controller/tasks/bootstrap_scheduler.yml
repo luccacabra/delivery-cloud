@@ -1,7 +1,27 @@
 ---
 - name: install scheduler
   get_url:
-    url: "https://storage.googleapis.com/kubernetes-release/release/{{ kubernetes_version }}/bin/linux/amd64/kube-scheduler"
+    url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kubernetes_version }}/bin/linux/amd64/kube-scheduler"
     dest: /usr/local/bin/
     mode: a+x
+  become: true
+
+- name: create scheduler unit file
+  copy:
+    content: |
+      [Unit]
+      Description=Kubernetes Scheduler
+      Documentation=https://github.com/kubernetes/kubernetes
+
+      [Service]
+      ExecStart=/usr/local/bin/kube-scheduler \
+        --leader-elect={{ scheduler_leader_elect }} \
+        --master=http://127.0.0.1:8080 \
+        --v=2
+      Restart=on-failure
+      RestartSec={{ scheduler_restart_sec }}
+
+      [Install]
+      WantedBy=multi-user.target
+    dest: /etc/systemd/system/kube-scheduler.service
   become: true

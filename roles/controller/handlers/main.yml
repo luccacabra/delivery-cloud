@@ -11,14 +11,20 @@
     state: restarted
   become: true
 
-- name: reload apiserver
-  command: systemctl daemon-reload
-  become: true
-  notify:
-    - restart etcd
-
-- name: restart apiserver
+- name: restart kube-apiserver
   service:
-    name: apiserver
+    name: kube-apiserver
+    state: restarted
+  become: true
+
+- name: restart kube-controller-manager
+  service:
+    name: kube-controller-manager
+    state: restarted
+  become: true
+
+- name: restart kube-scheduler
+  service:
+    name: kube-scheduler
     state: restarted
   become: true

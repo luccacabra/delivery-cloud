@@ -1,7 +1,7 @@
 ---
 - name: install controller-manager
   get_url:
-    url:  "https://storage.googleapis.com/kubernetes-release/release/{{ kubernetes_version }}/bin/linux/amd64/kube-controller-manager"
+    url:  "https://storage.googleapis.com/kubernetes-release/release/v{{ kubernetes_version }}/bin/linux/amd64/kube-controller-manager"
     dest: /usr/local/bin/
     mode: a+x
   become: true
@@ -16,18 +16,18 @@
       [Service]
       ExecStart=/usr/local/bin/kube-controller-manager \
         --address=0.0.0.0 \
-        --cluster-cidr=10.200.0.0/16 \
-        --cluster-name=kubernetes \
+        --cluster-cidr={{ controller_cluster_cidr }} \
+        --cluster-name={{ controller_cluster_name }} \
         --cluster-signing-cert-file=/var/lib/kubernetes/ca.pem \
         --cluster-signing-key-file=/var/lib/kubernetes/ca-key.pem \
-        --leader-elect=true \
+        --leader-elect={{ controller_leader_elect }} \
         --master=http://127.0.0.1:8080 \
         --root-ca-file=/var/lib/kubernetes/ca.pem \
         --service-account-private-key-file=/var/lib/kubernetes/ca-key.pem \
-        --service-cluster-ip-range=10.32.0.0/24 \
+        --service-cluster-ip-range={{ controller_service_cluster_ip_range }} \
         --v=2
       Restart=on-failure
-      RestartSec=5
+      RestartSec={{ controller_restart_sec }}
 
       [Install]
       WantedBy=multi-user.target

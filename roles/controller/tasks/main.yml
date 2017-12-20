@@ -21,6 +21,7 @@
                     secret: {{ encryption_key }}
             - identity: {}
     dest: "{{ ansible_env.HOME }}/.kube/encryption-config.yml"
+  when: use_encryption
 
 - name: bootstrap etcd
   include_tasks: bootstrap_etcd.yml
@@ -33,3 +34,11 @@
 
 - name: bootstrap scheduler
   include_tasks: bootstrap_scheduler.yml
+
+- name: reload controller
+  command: systemctl daemon-reload
+  become: true
+  notify:
+    - restart kube-apiserver
+    - restart kube-controller-manager
+    - restart kube-scheduler

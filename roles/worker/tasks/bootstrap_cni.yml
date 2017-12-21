@@ -1,0 +1,38 @@
+---
+- name: install cni plugins
+  unarchive:
+    src: "https://github.com/containernetworking/plugins/releases/download/v{{ cni_plugins_version }}/cni-plugins-amd64-v{{ cni_plugins_version }}.tgz"
+    dest: /opt/cni/bin
+    remote_src: yes
+  become: true
+
+- name: create bridge network file
+  copy:
+    content: |
+      {
+          "cniVersion": "0.3.1",
+          "name": "bridge",
+          "type": "bridge",
+          "bridge": "cnio0",
+          "isGateway": true,
+          "ipMasq": true,
+          "ipam": {
+              "type": "host-local",
+              "ranges": [
+                [{"subnet": "{{ pods_CIDR }}"}]
+              ],
+              "routes": [{"dst": "0.0.0.0/0"}]
+          }
+      }
+    dest: "/etc/cni/net.d/10-bridge.conf"
+  become: true
+
+- name: create loopback network file
+  copy:
+    content: |
+      {
+          "cniVersion": "0.3.1",
+          "type": "loopback"
+      }
+    dest: "/etc/cni/net.d/99-loopback.conf"
+  become: true

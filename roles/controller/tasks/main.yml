@@ -42,3 +42,6 @@
     - restart kube-apiserver
     - restart kube-controller-manager
     - restart kube-scheduler
+
+- name: configure kubectl
+  include_tasks: configure_kubectl.yml

@@ -1,0 +1,79 @@
+---
+- name: kubectl kubelet set cluster
+  command: >
+    bash -c
+    "kubectl config set-cluster {{ cluster_name }}
+    --certificate-authority=/etc/ssl/certs/ca.pem
+    --embed-certs=true
+    --server=https://{{ public_ip }}:6443
+    --kubeconfig=/var/lib/kubelet/kubeconfig/{{ ansible_nodename }}.kubeconfig"
+
+- name: kubectl kubelet set credentials
+  command: >
+    bash -c
+    "kubectl config set-credentials system:node:{{ ansible_nodename }}
+    --client-certificate=/etc/ssl/certs/{{ ansible_nodename }}.pem
+    --client-key=/etc/ssl/certs/{{ ansible_nodename }}-key.pem
+    --embed-certs=true
+    --kubeconfig=/var/lib/kubelet/kubeconfig/{{ ansible_nodename }}.kubeconfig"
+
+- name: kubectl kubelet set context
+  command: >
+    bash -c
+    "kubectl config set-context default
+    --cluster={{ cluster_name }}
+    --user=system:node:{{ ansible_nodename }}
+    --kubeconfig=/var/lib/kubelet/kubeconfig/{{ ansible_nodename }}.kubeconfig"
+
+- name: set kubectl worker context
+  command: "kubectl config use-context default --kubeconfig=/var/lib/kubelet/kubeconfig/{{ ansible_nodename }}.kubeconfig"
+
+- name: isntall socat for kubectl port-forward
+  apt:
+    name: socat
+    state: present
+  become: true
+
+- name: install kubelet
+  get_url:
+    src: "https://storage.googleapis.com/kubernetes-release/release/v{{ kubelet_version }}/bin/linux/amd64/kubelet"
+    dest: /usr/local/bin/kubelet
+    mode: a+x
+  become: true
+
+- name: create kubelet unit file
+  copy:
+    content: |
+      [Unit]
+      Description=Kubernetes Kubelet
+      Documentation=https://github.com/kubernetes/kubernetes
+      After=cri-containerd.service
+      Requires=cri-containerd.service
+
+      [Service]
+      ExecStart=/usr/local/bin/kubelet \
+        --allow-privileged={{ kubelet_allow_privileged }} \
+        --anonymous-auth={{ kubelet_anonymous_auth }} \
+        --authorization-mode={{ kubelet_authorization_mode }} \
+        --client-ca-file=/var/lib/kubernetes/ca.pem \
+        --cloud-provider= \
+        --cluster-dns={{ cluster_dns }} \
+        --cluster-domain={{ kubelet_cluster_domain }} \
+        --container-runtime={{ kubelet_container_runtime }} \
+        --container-runtime-endpoint={{ kubelet_container_runtime_endpoint }} \
+        --image-pull-progress-deadline={{ kubelet_image_pull_progress_deadline }} \
+        --kubeconfig=/var/lib/kubelet/kubeconfig \
+        --network-plugin={{ kubelet_network_plugin }} \
+        --pod-cidr={{ pods_CIDR }} \
+        --register-node={{ kubelet_register_node }} \
+        --runtime-request-timeout={{ kubelet_runtime_request_timeout }} \
+        --tls-cert-file=/var/lib/kubelet/{{ ansible_nodename }}.pem \
+        --tls-private-key-file=/var/lib/kubelet/{{ ansible_nodename }}-key.pem \
+        --v=2
+      Restart=on-failure
+      RestartSec={{ kubelet_restart_sec }}
+
+      [Install]
+      WantedBy=multi-user.target
+    dest: dest: /etc/systemd/system/kubelet.service
+  become: true

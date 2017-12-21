@@ -25,3 +25,5 @@
 
 #### Notes
 * sudo etcdctl --debug --endpoints https://<etcd node>:2379 --ca-file /etc/etcd/ca.pem --key-file /etc/etcd/kubernetes-key.pem --cert-file /etc/etcd/kubernetes.pem cluster-health
+* kubectl get componentstatuses
+    * will return `tsl: bad certificate` for etcd instances until v1.7 + (see https://github.com/kubernetes/kubernetes/pull/39716)

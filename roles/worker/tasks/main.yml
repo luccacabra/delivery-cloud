@@ -1,11 +1,27 @@
 - name: configure certs
   include_tasks: configure_certs.yml
 
-- name: configure kubectl
-  include_tasks: configure_kubectl.yml
+- name: boostrap kubectl
+  include_tasks: bootstrap_kubectl.yml
 
-- name: set kubectl worker context
-  command: "kubectl config use-context default --kubeconfig={{ ansible_env.HOME }}/.kube/{{ ansible_nodename }}.kubeconfig"
+- name: boostrap kube-proxy
+  include_tasks: bootstrap_kubeproxy.yml
 
-- name: set kubectl kube-proxy context
-  command: "kubectl config use-context default --kubeconfig={{ ansible_env.HOME }}/.kube/kube-proxy.kubeconfig"
+- name: boostrap kubelet
+  include_tasks: bootstrap_kubelet.yml
+
+- name: install cri-containerd
+  unarchive:
+    src: "https://github.com/kubernetes-incubator/cri-containerd/releases/download/v{{ cri_containerd_version }}-beta.0/cri-containerd-{{ cri_containerd_version }}-beta.0.linux-amd64.tar.gz"
+    dest: /
+  become: true
+
+- name: reload controller
+  command: systemctl daemon-reload
+  become: true
+  notify:
+    - restart kube-proxy
+    - restart kubelet
+    - restart containerd
+    - restart cri-containerd
+

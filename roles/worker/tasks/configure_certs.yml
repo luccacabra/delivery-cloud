@@ -38,13 +38,11 @@
     -config=/tmp/certs/ca-config.json
     -hostname={{ ansible_nodename }},{{ hostvars[inventory_hostname]['ansible_eth1']['ipv4']['address'] }}
     -profile=kubernetes
-    /tmp/certs/worker-csr.json | $GOPATH/bin/cfssljson -bare /etc/ssl/certs/{{ ansible_nodename }}"
+    /tmp/certs/worker-csr.json | $GOPATH/bin/cfssljson -bare /var/lib/kubernetes/{{ ansible_nodename }}"
   become: true
 
-- name: make worker key readable
-  file:
-    name: /etc/ssl/certs/{{ ansible_nodename }}-key.pem
-    mode: 0644
+- name: move worker key
+  command: "mv /var/lib/kubernetes/{{ ansible_nodename }}-key.pem /var/lib/kubelet/{{ ansible_nodename }}-key.pem"
   become: true
 
 - name: cleanup cert configs

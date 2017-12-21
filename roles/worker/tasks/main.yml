@@ -1,8 +1,20 @@
+- name: make kubernetes directory
+  file:
+    path: /var/lib/kubernetes
+    state: directory
+  become: true
+
+- name: make kubelet directory
+  file:
+    path: /var/lib/kubelet
+    state: directory
+  become: true
+
 - name: configure certs
   include_tasks: configure_certs.yml
 
-- name: boostrap kubectl
-  include_tasks: bootstrap_kubectl.yml
+- name: boostrap cni
+  include_tasks: bootstrap_cni.yml
 
 - name: boostrap kube-proxy
   include_tasks: bootstrap_kubeproxy.yml
@@ -10,11 +22,14 @@
 - name: boostrap kubelet
   include_tasks: bootstrap_kubelet.yml
 
-- name: install cri-containerd
+- name: install containerd and cri-containerd
   unarchive:
     src: "https://github.com/kubernetes-incubator/cri-containerd/releases/download/v{{ cri_containerd_version }}-beta.0/cri-containerd-{{ cri_containerd_version }}-beta.0.linux-amd64.tar.gz"
     dest: /
+    remote_src: yes
+    mode: a+x
   become: true
+  when: use_cri_containerd
 
 - name: reload controller
   command: systemctl daemon-reload

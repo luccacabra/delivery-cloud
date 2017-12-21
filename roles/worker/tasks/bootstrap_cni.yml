@@ -1,4 +1,16 @@
 ---
+- name: make cni bin directory
+  file:
+    path: /opt/cni/bin
+    state: directory
+  become: true
+
+- name: make cni conf directory
+  file:
+    path: /etc/cni/net.d
+    state: directory
+  become: true
+
 - name: install cni plugins
   unarchive:
     src: "https://github.com/containernetworking/plugins/releases/download/v{{ cni_plugins_version }}/cni-plugins-amd64-v{{ cni_plugins_version }}.tgz"

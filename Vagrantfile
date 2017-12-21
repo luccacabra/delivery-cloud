@@ -20,6 +20,7 @@ vars = YAML::load(File.open("group_vars/all"))
 
 encryption_key = ""
 use_encryption = false
+use_cri_containerd = false
 
 # encryption only supported after v1.7.0
 if Gem::Version.new(vars["kubernetes_version"]) >= Gem::Version.new('1.7.0')
@@ -32,6 +33,10 @@ if Gem::Version.new(vars["kubernetes_version"]) >= Gem::Version.new('1.7.0')
   use_encryption = true
 end
 
+# cri containerd only supported after v1.9.0
+if Gem::Version.new(vars["kubernetes_version"]) >= Gem::Version.new('1.9.0')
+  use_cri_containerd = true
+end
 
 # grap ips outside of vagrant block to ensure they're available for provisioning
 (2..controller_count + 1).each do |controller|
@@ -100,6 +105,7 @@ Vagrant.configure("2") do |config|
     ansible.extra_vars  = {
       "use_encryption" =>use_encryption,
       "encryption_key" => encryption_key,
+      "use_cri_containerd" => use_cri_containerd,
       "etcd_ips" => etcd_ips.join(","),
       "controller_ips" => controller_ips.join(","),
       "apiserver_count" => controller_count,

@@ -24,11 +24,6 @@
     mode: 0644
   become: true
 
-- name: copy worker cert config
-  copy:
-    src: csr/ca-config.json
-    dest: /tmp/certs/ca-config.json
-
 - name: generate worker cert
   command: >
     bash -c

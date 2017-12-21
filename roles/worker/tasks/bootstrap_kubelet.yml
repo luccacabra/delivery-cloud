@@ -7,6 +7,7 @@
     --embed-certs=true
     --server=https://{{ public_ip }}:6443
     --kubeconfig=/var/lib/kubelet/kubeconfig/{{ ansible_nodename }}.kubeconfig"
+  become: true
 
 - name: kubectl kubelet set credentials
   command: >
@@ -16,6 +17,7 @@
     --client-key=/etc/ssl/certs/{{ ansible_nodename }}-key.pem
     --embed-certs=true
     --kubeconfig=/var/lib/kubelet/kubeconfig/{{ ansible_nodename }}.kubeconfig"
+  become: true
 
 - name: kubectl kubelet set context
   command: >
@@ -24,9 +26,11 @@
     --cluster={{ cluster_name }}
     --user=system:node:{{ ansible_nodename }}
     --kubeconfig=/var/lib/kubelet/kubeconfig/{{ ansible_nodename }}.kubeconfig"
+  become: true
 
 - name: set kubectl worker context
   command: "kubectl config use-context default --kubeconfig=/var/lib/kubelet/kubeconfig/{{ ansible_nodename }}.kubeconfig"
+  become: true
 
 - name: isntall socat for kubectl port-forward
   apt:
@@ -36,9 +40,16 @@
 
 - name: install kubelet
   get_url:
-    src: "https://storage.googleapis.com/kubernetes-release/release/v{{ kubelet_version }}/bin/linux/amd64/kubelet"
+    url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kubelet_version }}/bin/linux/amd64/kubelet"
     dest: /usr/local/bin/kubelet
     mode: a+x
+  become: true
+
+- name: copy ca.pem to /var/lib/kubernetes
+  copy:
+    src: /etc/ssl/certs/ca.pem
+    dest: /var/lib/kubernetes/ca.pem
+    remote_src: yes
   become: true
 
 - name: create kubelet unit file
@@ -47,8 +58,6 @@
       [Unit]
       Description=Kubernetes Kubelet
       Documentation=https://github.com/kubernetes/kubernetes
-      After=cri-containerd.service
-      Requires=cri-containerd.service
 
       [Service]
       ExecStart=/usr/local/bin/kubelet \
@@ -75,5 +84,5 @@
 
       [Install]
       WantedBy=multi-user.target
-    dest: dest: /etc/systemd/system/kubelet.service
+    dest: /etc/systemd/system/kubelet.service
   become: true

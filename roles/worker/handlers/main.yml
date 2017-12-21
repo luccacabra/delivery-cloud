@@ -16,9 +16,11 @@
     name: containerd
     state: restarted
   become: true
+  when: use_cri_containerd
 
 - name: restart cri-containerd
   service:
     name: cri-containerd
     state: restarted
   become: true
+  when: use_cri_containerd

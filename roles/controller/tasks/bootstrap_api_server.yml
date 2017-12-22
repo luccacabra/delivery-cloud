@@ -68,7 +68,7 @@
         --admission-control={{ api_admission_control }} \
         --advertise-address={{ hostvars[inventory_hostname]['ansible_eth1']['ipv4']['address'] }} \
         --allow-privileged={{ api_allow_privileged }} \
-        --apiserver-count={{ apiserver_count }} \
+        --apiserver-count={{ apiservers|length }} \
         --audit-log-maxage={{ api_audit_log_maxage }} \
         --audit-log-maxbackup={{ api_audit_log_maxbackup }} \
         --audit-log-maxsize={{ api_audit_log_maxsize }} \
@@ -80,7 +80,7 @@
         --etcd-cafile=/var/lib/kubernetes/ca.pem \
         --etcd-certfile=/var/lib/kubernetes/kubernetes.pem \
         --etcd-keyfile=/var/lib/kubernetes/kubernetes-key.pem \
-        --etcd-servers={{ etcd_hosts }} \
+        --etcd-servers={% for apiserver in apiservers %}{{ apiserver.hostname }}:2379{{ "," if not loop.last else ""}}{% endfor %} \
         {{ encryption_flag }} \
         --event-ttl={{ api_event_ttl }} \
         --insecure-bind-address={{ api_insecure_bind_address }} \

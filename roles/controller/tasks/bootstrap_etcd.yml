@@ -90,7 +90,7 @@
         --listen-client-urls https://{{ hostvars[inventory_hostname]['ansible_eth1']['ipv4']['address'] }}:2379,http://127.0.0.1:2379 \
         --advertise-client-urls https://{{ hostvars[inventory_hostname]['ansible_eth1']['ipv4']['address'] }}:2379 \
         --initial-cluster-token etcd-cluster-0 \
-        --initial-cluster {{ etcd_ips }} \
+        --initial-cluster {% for apiserver in apiservers %}{{ apiserver.hostname }}={{ apiserver.ip }}:2380{{ "," if not loop.last else ""}}{% endfor %} \
         --initial-cluster-state new \
         --data-dir=/var/lib/etcd
       Restart=on-failure

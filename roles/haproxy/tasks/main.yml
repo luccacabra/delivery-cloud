@@ -1,0 +1,56 @@
+- name: install curl
+  apt:
+    name: curl
+    state: present
+  become: true
+
+- name: enable backports repository
+  command: >
+    bash -c
+    "echo \"deb http://httpredir.debian.org/debian jessie-backports main\"
+    | sudo tee /etc/apt/sources.list.d/backports.list"
+
+- name: add gpg key
+  command: >
+    bash -c
+    "curl https://haproxy.debian.net/bernat.debian.org.gpg
+    | sudo apt-key add -"
+
+- name: enable dedicated repository
+  command: >
+    bash -c
+    "echo \"deb http://haproxy.debian.net jessie-backports-1.8 main\"
+    | sudo tee /etc/apt/sources.list.d/haproxy.list"
+
+- name: install haproxy
+  apt:
+    name: haproxy
+    update_cache: yes
+    default_release: jessie-backports*
+  become: true
+
+- name: create haproxy config
+  template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/kube-haproxy.cfg
+  become: true
+
+- name: upload ca-key
+  copy:
+    src: csr/ca/ca-key.pem
+    dest: /etc/ssl/certs/ca-key.pem
+  become: true
+
+- name: append ca-key to ca cert for haproxy
+  command: >
+  bash -c
+  "cat /etc/ssl/certs/ca.pem /etc/ssl/certs/ca-key.pem > /etc/ssl/certs/haproxy-ca.pem"
+  become: true
+
+- name: restart haproxy
+  command: >
+    haproxy -f /etc/haproxy/haproxy.cfg
+    -f /etc/haproxy/kube-haproxy.cfg
+    -p /var/run/haproxy.pid
+    -sf $(cat /var/run/haproxy.pid)
+  become: true

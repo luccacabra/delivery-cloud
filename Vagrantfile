@@ -11,10 +11,7 @@ workers = []
 loadbalancers = []
 
 
-# these are convenience arrays used to make ansible'ing unit files easier
-controller_ips = []
-etcd_ips = []
-etcd_hosts = []
+apiservers = []
 
 vars = YAML::load(File.open("group_vars/all"))
 
@@ -40,9 +37,10 @@ end
 
 # grap ips outside of vagrant block to ensure they're available for provisioning
 (2..controller_count + 1).each do |controller|
-  controller_ips << "10.0.0.#{controller}"
-  etcd_ips << "kubes-controller#{controller}=https://10.0.0.#{controller}:2380"
-  etcd_hosts << "https://10.0.0.#{controller}:2379"
+  apiservers << {
+      "hostname" => "kubes-controller#{controller}",
+      "ip" => "10.0.0.#{controller}"
+  }
 end
 
 Vagrant.configure("2") do |config|
@@ -106,10 +104,7 @@ Vagrant.configure("2") do |config|
       "use_encryption" =>use_encryption,
       "encryption_key" => encryption_key,
       "use_cri_containerd" => use_cri_containerd,
-      "etcd_ips" => etcd_ips.join(","),
-      "controller_ips" => controller_ips.join(","),
-      "apiserver_count" => controller_count,
-      "etcd_hosts" => etcd_hosts.join(",")
+      "apiservers" => apiservers,
     }
     ansible.groups = {
         "controllers" => controllers,

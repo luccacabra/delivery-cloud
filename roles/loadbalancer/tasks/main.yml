@@ -1,0 +1,23 @@
+---
+- name: configure certs
+  include_role:
+    name: controller
+    tasks_from: configure_certs.yml
+
+#- name: copy ca key
+#  copy:
+#    src: csr/ca/ca-key.pem
+#    dest: /etc/ssl/certs/
+#  become: true
+#
+#- name: generate kubernetes cert
+#  command: >
+#    bash -c
+#    "$GOPATH/bin/cfssl gencert
+#    -ca=/etc/ssl/certs/ca.pem
+#    -ca-key=/etc/ssl/certs/ca-key.pem
+#    -config=/tmp/certs/ca-config.json
+#    -hostname={{ first_service_cluster_ip }},{% for apiserver in apiservers %}{{ apiserver.ip }}{{ "," if not loop.last else ""}}{% endfor %},{{ public_ip }},127.0.0.1,kubernetes.default
+#    -profile=kubernetes
+#    /tmp/certs/kubernetes-csr.json | $GOPATH/bin/cfssljson -bare /etc/ssl/certs/kubernetes"
+#  become: true

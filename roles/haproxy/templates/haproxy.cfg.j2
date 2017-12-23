@@ -2,8 +2,7 @@ global
     tune.ssl.default-dh-param 2048
 
 frontend kube-cluster
-    bind *:80
-    bind *:443 ssl crt /etc/ssl/certs/haproxy-ca.pem
+    bind *:6443 ssl crt /etc/ssl/certs/kubernetes-haproxy.pem
     mode http
     default_backend kube-cluster
 

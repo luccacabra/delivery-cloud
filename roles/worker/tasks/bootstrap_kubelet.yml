@@ -62,23 +62,16 @@
       [Service]
       ExecStart=/usr/local/bin/kubelet \
         --allow-privileged={{ kubelet_allow_privileged }} \
-        --anonymous-auth={{ kubelet_anonymous_auth }} \
-        --authorization-mode={{ kubelet_authorization_mode }} \
         --client-ca-file=/var/lib/kubernetes/ca.pem \
-        --cloud-provider= \
         --cluster-dns={{ cluster_dns }} \
         --cluster-domain={{ kubelet_cluster_domain }} \
-        --container-runtime={{ kubelet_container_runtime }} \
-        --container-runtime-endpoint={{ kubelet_container_runtime_endpoint }} \
-        --image-pull-progress-deadline={{ kubelet_image_pull_progress_deadline }} \
         --kubeconfig=/var/lib/kubelet/kubeconfig \
         --network-plugin={{ kubelet_network_plugin }} \
         --pod-cidr={{ pods_CIDR }} \
-        --register-node={{ kubelet_register_node }} \
-        --runtime-request-timeout={{ kubelet_runtime_request_timeout }} \
         --tls-cert-file=/var/lib/kubelet/{{ ansible_nodename }}.pem \
         --tls-private-key-file=/var/lib/kubelet/{{ ansible_nodename }}-key.pem \
-        --v=2
+        --v=2 \
+        --require-kubeconfig=true
       Restart=on-failure
       RestartSec={{ kubelet_restart_sec }}
 

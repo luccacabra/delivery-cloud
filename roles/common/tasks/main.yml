@@ -1,43 +1,43 @@
-- name: install git
-  apt:
-    name: git-core
-    state: present
-  become: true
-
-- name: install gcc
-  apt:
-    name: gcc
-    state: present
-  become: true
-
-- name: download go {{ go_version }}
-  get_url:
-    url: https://redirector.gvt1.com/edgedl/go/go{{ go_version }}.linux-amd64.tar.gz
-    dest: /tmp
-    checksum: "sha256:{{ go_checksum }}"
-    timeout: 30
-
-- name: extract go {{ go_version }}
-  unarchive:
-    src: "/tmp/go{{ go_version }}.linux-amd64.tar.gz"
-    dest: /usr/local
-    remote_src: yes
-  become: true
-
-- name: clean up go download
-  file:
-    state: absent
-    name: "/tmp/go{{ go_version }}.linux-amd64.tar.gz"
-
-- name: Set go environment variables
-  copy:
-    src: bin/setup-go.sh
-    dest: /etc/profile.d
-    mode: 0755
-  become: true
-
-- name: install cfssl
-  command: go get -u github.com/cloudflare/cfssl/cmd/...
+#- name: install git
+#  apt:
+#    name: git-core
+#    state: present
+#  become: true
+#
+#- name: install gcc
+#  apt:
+#    name: gcc
+#    state: present
+#  become: true
+#
+#- name: download go {{ go_version }}
+#  get_url:
+#    url: https://redirector.gvt1.com/edgedl/go/go{{ go_version }}.linux-amd64.tar.gz
+#    dest: /tmp
+#    checksum: "sha256:{{ go_checksum }}"
+#    timeout: 30
+#
+#- name: extract go {{ go_version }}
+#  unarchive:
+#    src: "/tmp/go{{ go_version }}.linux-amd64.tar.gz"
+#    dest: /usr/local
+#    remote_src: yes
+#  become: true
+#
+#- name: clean up go download
+#  file:
+#    state: absent
+#    name: "/tmp/go{{ go_version }}.linux-amd64.tar.gz"
+#
+#- name: Set go environment variables
+#  copy:
+#    src: bin/setup-go.sh
+#    dest: /etc/profile.d
+#    mode: 0755
+#  become: true
+#
+#- name: install cfssl
+#  command: go get -u github.com/cloudflare/cfssl/cmd/...
 
 - name: copy ca
   copy:

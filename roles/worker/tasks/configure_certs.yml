@@ -1,8 +1,9 @@
 ---
-- name: copy worker cert config
-  copy:
-    src: worker-csr.json
+- name: create worker-csr config
+  template:
+    src: worker-csr.json.j2
     dest: /tmp/certs/worker-csr.json
+  become: true
 
 - name: copy ca key
   copy:
@@ -31,7 +32,7 @@
     -ca=/etc/ssl/certs/ca.pem
     -ca-key=/tmp/certs/ca-key.pem
     -config=/tmp/certs/ca-config.json
-    -hostname={{ ansible_nodename }},{{ hostvars[inventory_hostname]['ansible_eth1']['ipv4']['address'] }}
+    -hostname={{ ansible_nodename }},{{ ansible_default_ipv4.address }},{{ hostvars[inventory_hostname]['ansible_eth1']['ipv4']['address'] }}
     -profile=kubernetes
     /tmp/certs/worker-csr.json | $GOPATH/bin/cfssljson -bare /var/lib/kubernetes/{{ ansible_nodename }}"
   become: true

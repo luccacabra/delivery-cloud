@@ -1,10 +1,6 @@
 ---
 # this could all be done in the unit file copy directives, but is more readable in this format :shrug:
 
-# 'Select the first valid IP from ServiceClusterIPRange to use as the GenericAPIServer service IP'
-# https://github.com/kelseyhightower/kubernetes-the-hard-way/issues/105
-first_service_cluster_ip: 10.32.0.1
-
 ###############
 #
 # api server

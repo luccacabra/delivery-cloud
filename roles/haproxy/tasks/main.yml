@@ -35,22 +35,17 @@
     dest: /etc/haproxy/kube-haproxy.cfg
   become: true
 
-- name: upload ca-key
-  copy:
-    src: csr/ca/ca-key.pem
-    dest: /etc/ssl/certs/ca-key.pem
-  become: true
-
 - name: append ca-key to ca cert for haproxy
   command: >
-  bash -c
-  "cat /etc/ssl/certs/ca.pem /etc/ssl/certs/ca-key.pem > /etc/ssl/certs/haproxy-ca.pem"
+    bash -c
+    "cat /etc/ssl/certs/kubernetes.pem /etc/ssl/certs/kubernetes-key.pem > /etc/ssl/certs/kubernetes-haproxy.pem"
   become: true
 
 - name: restart haproxy
   command: >
-    haproxy -f /etc/haproxy/haproxy.cfg
+    bash -c
+    "haproxy -f /etc/haproxy/haproxy.cfg
     -f /etc/haproxy/kube-haproxy.cfg
     -p /var/run/haproxy.pid
-    -sf $(cat /var/run/haproxy.pid)
+    -sf $(cat /var/run/haproxy.pid)"
   become: true

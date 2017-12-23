@@ -12,7 +12,7 @@ kubelet_anonymous_auth: false
 kubelet_authorization_mode: Webhook
 
 kubelet_cluster_dns: 10.32.0.10
-kubelet_cluster_domain: cluster.local
+kubelet_cluster_domain: "{{ cluster_name }}.local"
 
 kubelet_container_runtime: remote
 kubelet_container_runtime_endpoint: unix:///var/run/cri-containerd.sock

@@ -20,3 +20,7 @@ cluster_dns: 10.32.0.10
 
 pods_CIDR: 10.200.0.0/16
 service_CIDR: 10.32.0.0/24
+
+# 'Select the first valid IP from ServiceClusterIPRange to use as the GenericAPIServer service IP'
+# https://github.com/kelseyhightower/kubernetes-the-hard-way/issues/105
+first_service_cluster_ip: 10.32.0.1

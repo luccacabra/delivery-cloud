@@ -14,8 +14,3 @@ bootstrap-certs:
 		 -config=csr/ca-config.json \
 		 -profile=kubernetes \
 		 csr/kube-proxy-csr.json | cfssljson -bare csr/ca/kube-proxy
-
-
-provision-controllers:
-
-provision-workers:
